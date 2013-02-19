@@ -17,6 +17,7 @@ Imagin you have a config as below:
   key            url
   add_tag_prefix extracted.
   only           foo, baz
+  add_path       site
 </match>
 ```
 
@@ -24,7 +25,7 @@ And you feed such a value into fluentd:
 
 ```
 "test" => {
-  "url" => "http://example.com/?foo=bar&baz=qux&hoge=fuga"
+  "url" => "http://example.com/website?foo=bar&baz=qux&hoge=fuga"
 }
 ```
 
@@ -32,9 +33,10 @@ Then you'll get re-emmited tag/record-s below:
 
 ```
 "extracted.test" => {
-  "url" => "http://example.com/?foo=bar&baz=qux&hoge=fuga"
-  "foo" => "bar",
-  "baz" => "qux"
+  "url"  => "http://example.com/?foo=bar&baz=qux&hoge=fuga"
+  "foo"  => "bar",
+  "baz"  => "qux",
+  "site" => "website"
 }
 ```
 
@@ -63,6 +65,10 @@ If set, the key/value whose key is included `except` will NOT be added to the re
 ### discard_key
 
 If set to `true`, the original `key` url will be discarded from the record. Defaults to `false` (preserve key).
+
+### add_path
+
+If set, URL path will be added to the whose key of the record.
 
 ## Installation
 

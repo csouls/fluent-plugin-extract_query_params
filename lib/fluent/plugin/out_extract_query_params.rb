@@ -9,6 +9,7 @@ module Fluent
     config_param :key,    :string
     config_param :only,   :string, :default => nil
     config_param :except, :string, :default => nil
+    config_param :add_path, :string, :default => nil
     config_param :discard_key, :bool, :default => false
     config_param :add_field_prefix, :string, :default => nil
     config_param :permit_blank_key, :bool, :default => false
@@ -58,6 +59,7 @@ module Fluent
                 rescue URI::InvalidURIError => e
                   URI.parse(WEBrick::HTTPUtils.escape(record[key]))
                 end
+          record[add_path] = url.path if add_path
           unless url.query.nil?
             url.query.split('&').each do |pair|
               key, value = pair.split('=').map { |i| URI.unescape(i) }

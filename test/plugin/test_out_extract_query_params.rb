@@ -3,7 +3,7 @@
 require 'test_helper'
 
 class ExtractQueryParamsOutputTest < Test::Unit::TestCase
-  URL = 'http://example.com/?foo=bar&baz=qux&%E3%83%A2%E3%83%AA%E3%82%B9=%E3%81%99%E3%81%9F%E3%81%98%E3%81%8A'
+  URL = 'http://example.com/website?foo=bar&baz=qux&%E3%83%A2%E3%83%AA%E3%82%B9=%E3%81%99%E3%81%9F%E3%81%98%E3%81%8A'
 
   def setup
     Fluent::Test.setup
@@ -20,11 +20,13 @@ class ExtractQueryParamsOutputTest < Test::Unit::TestCase
       key            url
       add_tag_prefix extracted.
       only           foo, baz
+      add_path       site
     ])
 
     assert_equal 'url',        d.instance.key
     assert_equal 'extracted.', d.instance.add_tag_prefix
     assert_equal 'foo, baz',   d.instance.only
+    assert_equal 'site',       d.instance.add_path
 
     # when mandatory keys not set
     assert_raise(Fluent::ConfigError) do
@@ -324,5 +326,25 @@ class ExtractQueryParamsOutputTest < Test::Unit::TestCase
     r = emits.shift[2]
     assert_equal 2, r.size
     assert_equal 'b', r['a']
+  end
+
+  def test_add_path
+    d = create_driver(%[
+      key            url
+      add_tag_prefix extracted.
+      add_path       site
+    ])
+
+    tag    = 'test'
+    record = {
+      'url' => URL,
+    }
+    d.instance.filter_record('test', Time.now, record)
+
+    assert_equal URL,         record['url']
+    assert_equal '/website',  record['site']
+    assert_equal 'bar',       record['foo']
+    assert_equal 'qux',       record['baz']
+    assert_equal 'すたじお',  record['モリス']
   end
 end
